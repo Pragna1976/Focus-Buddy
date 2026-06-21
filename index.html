@@ -541,7 +541,7 @@ textarea:focus{border-color:rgba(124,111,247,.4);box-shadow:0 0 0 3px rgba(124,1
   <button class="mt-btn" id="mini-toggle" title="Play / Pause"><i class="ti ti-player-play" id="mini-icon"></i></button>
   <button class="mt-btn" id="mini-open" title="Open full timer"><i class="ti ti-clock"></i></button>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
 <script>
 const CONFIG={xp:{step:10,sessionFactor:2,minSessionXP:10},timer:{defaultWork:20,defaultBreak:5},levels:{xpPerLevel:500}};
 let sb=null;
@@ -596,75 +596,70 @@ const emergencyGuidance={
   Bored:{title:'You are bored — make it more active',body:'ADHD brains need novelty and movement. Turn study into an active game, use a timer, and switch topics often. Boredom clears faster when the task feels less passive.',steps:['Pick a different method: draw, quiz, teach, or speak aloud','Use a 10-minute timer and go fast','Switch subjects after one mini-block','Add a small reward or silly break after each block']}
 };
 const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-async function initAuthSession(){
+function loadSupabaseDynamically() {
+  if (typeof supabase !== 'undefined') {
+    initSupabase();
+    checkSupabaseSession();
+    return;
+  }
+  const script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+  script.async = true;
+  script.onload = () => {
+    initSupabase();
+    checkSupabaseSession();
+  };
+  script.onerror = () => {
+    console.warn('Supabase SDK load failed, staying in offline fallback mode.');
+    initSupabase();
+  };
+  document.body.appendChild(script);
+}
+
+async function checkSupabaseSession() {
+  try {
+    const { data: { session }, error } = await sb.auth.getSession();
+    if (!error && session) {
+      if (appLoaded) return;
+      currentUser = session.user;
+      appLoaded = true;
+      hide('auth-screen');
+      show('loading-screen');
+      await loadApp();
+    }
+  } catch(e) {
+    console.error('checkSupabaseSession error:', e);
+  }
+}
+
+const startApp = async () => {
   updateOnlineStatus();
   if('Notification'in window&&Notification.permission==='default'){
     Notification.requestPermission();
   }
-  
+
+  // 1. Initialize local mock or existing supabase client immediately
+  initSupabase();
+
+  // 2. Check if logged in as Guest
   let guestProfile = null;
   try {
     guestProfile = localStorage.getItem(`u_guest_user_profile`);
   } catch(e){}
-  
+
   if (guestProfile) {
     currentUser = { id: 'guest_user', email: 'guest@focusbuddy.local', user_metadata: { name: 'Guest Buddy' } };
     profile = JSON.parse(guestProfile);
     appLoaded = true;
     await loadApp();
-    return;
-  }
-
-  try {
-    const sessionPromise=sb.auth.getSession();
-    const timeoutPromise=new Promise(resolve=>setTimeout(()=>resolve({timeout:true}),5000));
-    const result=await Promise.race([sessionPromise,timeoutPromise]);
-    if(result && result.timeout){
-      console.warn('Auth init timed out');
-      hide('loading-screen');
-      show('auth-screen');
-      return;
-    }
-    const{data:{session},error}=result;
-    if(error)throw error;
-    if(session){
-      appLoaded=true;
-      currentUser=session.user;
-      await loadApp();
-    }else{
-      hide('loading-screen');
-      show('auth-screen');
-    }
-  } catch(e) {
-    console.error('Session retrieval failed, showing login screen:', e);
+  } else {
+    // Show login page instantly!
     hide('loading-screen');
     show('auth-screen');
   }
-}
 
-const startApp = async ()=>{
-  try{
-    if(typeof supabase==='undefined'){
-      await new Promise(resolve=>{
-        const interval=setInterval(()=>{
-          if(typeof supabase!=='undefined'){
-            clearInterval(interval);
-            resolve();
-          }
-        },50);
-        setTimeout(()=>{
-          clearInterval(interval);
-          resolve();
-        },3000);
-      });
-    }
-    initSupabase(); // Initialize sb client safely (real or mock)
-    await initAuthSession();
-  }catch(err){
-    console.error('Auth init error:',err);
-    hide('loading-screen');
-    show('auth-screen');
-  }
+  // 3. Load Supabase in the background dynamically without blocking initial render
+  loadSupabaseDynamically();
 };
 if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',startApp);}else{startApp();}
 sb.auth.onAuthStateChange(async(event,session)=>{if(event==='SIGNED_IN'&&session){if(appLoaded)return;appLoaded=true;currentUser=session.user;hide('auth-screen');show('loading-screen');await loadApp();}else if(event==='SIGNED_OUT'){appLoaded=false;currentUser=null;profile=null;hide('app');show('auth-screen');}});
