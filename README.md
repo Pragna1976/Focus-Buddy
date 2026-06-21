@@ -1,37 +1,45 @@
-# FocusBuddy — Local Development Notes
+# FocusBuddy — ADHD Study Companion
 
-This workspace contains `index (1).html` — a single-file Focus Timer web app with PWA support, background sounds, and Supabase integration.
+FocusBuddy is a premium, feature-rich single-page study application tailored for ADHD brains, with built-in PWA support, local background ambient sounds, task/step management, flashcards, a weekly study calendar, rewards tracking, and Supabase integration.
 
-What I changed
-- Added PWA SVG icons at `icons/icon-192.svg` and `icons/icon-512.svg`, and updated `manifest.json`.
-- Enhanced sound handling to support optional looped audio samples (`sounds/*.mp3`) with crossfade and per-sound gain. If sample files are not present, the app falls back to synthesized noise generators (white/brown/rain/lofi).
-- Added persistent `sound`, `soundVolume`, and `soundMuted` settings via `localStorage`.
-- Implemented graceful autoplay behavior: audio starts after a user gesture.
+## Key Features
 
-How to provide better looped audio files
-1. Create a folder `sounds/` next to `index (1).html`.
-2. Add looped audio files named exactly:
-   - `sounds/lofi.mp3`
-   - `sounds/rain.mp3`
-   - `sounds/brown.mp3`
-   - `sounds/white.mp3`
+- **Resilient Focus Timer:** Supports Pomodoro cycles, "Just 2 Mins" (to defeat task paralysis), and a "Flow State" count-up stopwatch. Includes visual minute progress ticking.
+- **Resilient Notes App:** Create, select, edit, and expand notes. Automatically backed up to local storage if Supabase connection drops.
+- **Step-by-Step Task Tracker:** Set priority tasks, add sub-steps, complete them, and watch your progress update in real time.
+- **Flashcards & Active Recall:** Group cards, rate recall status (Again/Hard/Good) and review. Supports bulk import.
+- **Ambient Sound Mixer:** Offline-friendly synthetic sound generators (Lofi, Rain, Brown, White) and WebAudio looped audio support with smooth crossfading.
+- **Offline Reliability:** Automatic client fallbacks to `localStorage` for all core entities (profile, tasks, steps, flashcards, notes, weekly days, badge accomplishments).
 
-Files should be reasonably short looped clips (10–60s). When present the app will load and use them; otherwise the synth fallback is used.
+## Local Development & Preview
 
-Local testing
-1. Start a simple static server in the folder containing `index (1).html`:
+To preview the app locally:
+1. Make sure you have python or node/npx installed.
+2. Start a local server at the root directory:
+   ```bash
+   # using python
+   python -m http.server 8080
+   
+   # or using node/npx
+   npx http-server -p 8080
+   ```
+3. Open [http://localhost:8080](http://localhost:8080) in your browser.
 
-```bash
-# from PowerShell / cmd
-python -m http.server 8000
-```
+---
 
-2. Open http://localhost:8000/index%20(1).html in a browser.
-3. Click anywhere to enable audio, then pick a background sound and adjust volume/mute.
+## Deploy to Netlify (Step-by-Step)
 
-Next steps you might want me to do
-- Add example looped audio files to `sounds/` (I can add placeholder loops if you want).
-- Improve offline caching of sound files in `service-worker.js`.
-- Add per-sound EQ presets and smoother crossfades.
+Deploying FocusBuddy to Netlify takes less than 2 minutes and is completely free:
 
-If you want me to add placeholder sample files now, say "Add placeholders" and I'll create short silent sample files you can replace later.
+1. **Sign up / Log in:** Go to [Netlify](https://www.netlify.com/) and sign in using your GitHub account.
+2. **Add New Site:** Click on the **Add new site** button on your dashboard and select **Import from Git**.
+3. **Connect GitHub:** Select **GitHub** and authorize Netlify to access your repositories.
+4. **Choose Repository:** Select the `Focus-Buddy` repository from your list.
+5. **Configure Build Settings:**
+   - **Branch to deploy:** `main`
+   - **Base directory:** (leave blank)
+   - **Build command:** (leave blank)
+   - **Publish directory:** `.` (or leave blank; the `netlify.toml` file will automatically set it to the root).
+6. **Deploy:** Click **Deploy site**. Netlify will build, assign a subdomain (e.g. `your-app.netlify.app`), and deploy your app instantly!
+
+*Note: The included `netlify.toml` file automatically configures premium security headers and optimal cache rules for assets, icons, and the service worker.*

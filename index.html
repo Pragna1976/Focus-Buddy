@@ -5,11 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FocusBuddy — ADHD Study App</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Bricolage+Grotesque:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#07060f">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -539,6 +540,7 @@ textarea:focus{border-color:rgba(124,111,247,.4);box-shadow:0 0 0 3px rgba(124,1
   <button class="mt-btn" id="mini-toggle" title="Play / Pause"><i class="ti ti-player-play" id="mini-icon"></i></button>
   <button class="mt-btn" id="mini-open" title="Open full timer"><i class="ti ti-clock"></i></button>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 const CONFIG={xp:{step:10,sessionFactor:2,minSessionXP:10},timer:{defaultWork:20,defaultBreak:5},levels:{xpPerLevel:500}};
 const sb=supabase.createClient('https://infmhsedoafkiocuoekb.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImluZm1oc2Vkb2Fma2lvY3VvZWtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0NjA5MzAsImV4cCI6MjA5NTAzNjkzMH0.K9qWJpEY-Zlyp_q5CoLl00RLxXpxShbHWKklq8TbcAg');
